@@ -1,0 +1,8 @@
+{
+  "name": "Tarik Manga Deposu",
+  "badge": "TR",
+  "sources": [
+    "https://github.com/keiyoushi/extensions/raw/repo/index.pb",
+    "https://raw.githubusercontent.com/cuong-tran/manga-repo/repo/index.pb"
+  ]
+}
