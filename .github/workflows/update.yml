@@ -1,0 +1,38 @@
+name: Depoyu güncelle
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: [sources.json, merge_repos.py, .github/workflows/update.yml]
+  schedule:
+    - cron: "17 3 * * *"   # her gün 03:17 UTC
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-repo
+  cancel-in-progress: true
+
+jobs:
+  merge:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Testler
+        run: python test_merge.py
+      - name: Depoları birleştir
+        run: python merge_repos.py --config sources.json --out dist/index.pb
+      - name: "`repo` dalına yayınla"
+        run: |
+          cd dist
+          git init -q -b repo
+          git config user.name "repo-bot"
+          git config user.email "repo-bot@users.noreply.github.com"
+          git add index.pb
+          git commit -q -m "Birleşik depo $(date -u +%F)"
+          git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" repo
