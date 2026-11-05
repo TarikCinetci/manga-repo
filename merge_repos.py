@@ -150,6 +150,15 @@ def package_and_version(record):
     return pkg, ver
 
 
+def has_jar(record):
+    for f, w, val in parse(record):
+        if f == 3 and w == 2:
+            for rf, rw, rv in parse(val):
+                if rf == 501 and rw == 2 and rv:
+                    return True
+    return False
+
+
 def merge(payloads_with_base):
     best = {}
     order = []
@@ -162,10 +171,11 @@ def merge(payloads_with_base):
                 fixed = rewrite_record(record, base)
             except ValueError:
                 continue
+            rank = (has_jar(fixed), ver)
             if pkg not in best:
-                order.append(pkg); best[pkg] = (ver, fixed)
-            elif ver > best[pkg][0]:
-                best[pkg] = (ver, fixed)
+                order.append(pkg); best[pkg] = (rank, fixed)
+            elif rank > best[pkg][0]:
+                best[pkg] = (rank, fixed)
     return [best[p][1] for p in order]
 
 
